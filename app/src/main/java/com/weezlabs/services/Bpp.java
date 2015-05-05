@@ -9,8 +9,6 @@ package com.weezlabs.services;
 
 public class Bpp {
 
-    final static int NUM = 32000;    // nth number of pi to print out
-
     /**
      * Returns the nth digit of pi followed by the next 8 numbers
      *
@@ -82,7 +80,7 @@ public class Bpp {
             s = mulMod(s, t, av);
             sum = (sum + (double) s / (double) av) % 1;
         }
-        return (int) (sum * 1e9); // 1e9 is 9 decimal places
+        return (int) (sum * 1e10); // 1e9 is 9 decimal places
     }
 
     private long mulMod(long a, long b, long m) {

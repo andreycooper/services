@@ -19,7 +19,7 @@ import com.daimajia.numberprogressbar.NumberProgressBar;
 public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    public static final int PRECISION_32K = 32000;
+    private static final int PRECISION_32K = 32000;
     private int[] mPrecisionValues;
     private SharedPreferences mSharedPrefs;
     private Spinner mSpinner;
@@ -33,6 +33,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mPrefsChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(getString(R.string.key_service_running))) {
+                    Log.d(LOG_TAG, "change prefs: " + key);
+                    updateViews();
+                    mStartCalculatingButton.setEnabled(true);
+                }
+            }
+        };
+        mSharedPrefs.registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.precision_array, android.R.layout.simple_spinner_item);
@@ -78,18 +89,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mPrefsChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getString(R.string.key_service_running))) {
-                    Log.d(LOG_TAG, "change prefs: " + key);
-                    updateViews();
-                    mStartCalculatingButton.setEnabled(true);
-                }
-            }
-        };
-        mSharedPrefs.registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
-
     }
 
     private void updateViews() {

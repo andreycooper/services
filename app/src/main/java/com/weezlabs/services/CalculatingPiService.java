@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class CalculatingPiService extends Service {
     private static final String ACTION_START_CALCULATING = "com.weezlabs.services.START_CALCULATING";
@@ -76,11 +77,17 @@ public class CalculatingPiService extends Service {
         SharedPreferences.Editor editor = mSharedPrefs.edit();
         editor.putBoolean(getString(R.string.key_service_running), false);
         editor.commit();
-        mCalculatingTask.cancel(true);
     }
 
     private static class CalculatingTask extends AsyncTask<Integer, Integer, Void> {
+        private static final long SLEEP_TIME = 1000;
+        private static final String LOG_TAG = CalculatingTask.class.getSimpleName();
         private boolean mIsRunning;
+        private SharedPreferences mPreferences;
+
+        public CalculatingTask(SharedPreferences preferences) {
+            mPreferences = preferences;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -91,6 +98,7 @@ public class CalculatingPiService extends Service {
         protected Void doInBackground(Integer... params) {
             if (!isCancelled() && mIsRunning) {
                 // TODO: calculate PI
+
             }
             return null;
         }
@@ -98,7 +106,21 @@ public class CalculatingPiService extends Service {
         @Override
         protected void onProgressUpdate(Integer... values) {
             // TODO: update progress
-            super.onProgressUpdate(values);
+
+        }
+
+        public void cancelTask() {
+            cancel(true);
+            mIsRunning = true;
+        }
+
+        private void sleep() {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException e) {
+                Log.e(LOG_TAG, "sleep was interrupted");
+                e.printStackTrace();
+            }
         }
     }
 }
