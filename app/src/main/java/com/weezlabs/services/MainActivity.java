@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,12 +13,13 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
+import com.weezlabs.services.service.CalculatingPiService;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final int PRECISION_32K = 32000;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    private static final int PRECISION_32K = 32000;
     private int[] mPrecisionValues;
     private SharedPreferences mSharedPrefs;
     private Spinner mSpinner;
@@ -37,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getString(R.string.key_service_running))) {
-                    Log.d(LOG_TAG, "change prefs: " + key);
                     updateViews();
                     mStartCalculatingButton.setEnabled(true);
+                } else if (key.equals(getString(R.string.key_current_progress))) {
+                    updateProgress();
                 }
             }
         };
@@ -60,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 SharedPreferences.Editor editor = mSharedPrefs.edit();
                 editor.putInt(getString(R.string.key_count_to_calculate), mPrecisionValues[position]);
-                editor.apply();
+                editor.putString(getString(R.string.key_current_precision_string),
+                        (String) parent.getItemAtPosition(position));
+                editor.commit();
             }
 
             @Override
@@ -72,9 +75,7 @@ public class MainActivity extends AppCompatActivity {
         mStartCalculatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean isServiceRunning = mSharedPrefs.getBoolean(getString(R.string.key_service_running), false);
-                Log.d(LOG_TAG, "Service running:  " + isServiceRunning);
-                if (!isServiceRunning) {
+                if (!isServiceRunning()) {
                     CalculatingPiService.startActionStartCalculating(getApplicationContext());
                 } else {
                     CalculatingPiService.startActionStopCalculating(getApplicationContext());
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateViews();
+        updateProgress();
     }
 
     @Override
@@ -96,10 +98,7 @@ public class MainActivity extends AppCompatActivity {
         int position = findPosition(mPrecisionValues, count);
         mSpinner.setSelection(position);
 
-        boolean isServiceRunning = mSharedPrefs.getBoolean(getString(R.string.key_service_running), false);
-        Log.d(LOG_TAG, "updateViews(). Service running :" + isServiceRunning);
-
-        if (!isServiceRunning) {
+        if (!isServiceRunning()) {
             mSpinner.setEnabled(true);
             mStartCalculatingButton.setText(getString(R.string.label_button_start));
             mCalculationProgressBar.setVisibility(View.GONE);
@@ -108,6 +107,20 @@ public class MainActivity extends AppCompatActivity {
             mStartCalculatingButton.setText(getString(R.string.label_button_cancel));
             mCalculationProgressBar.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void updateProgress() {
+        int progress = mSharedPrefs.getInt(getString(R.string.key_current_progress), 0);
+        mCalculationProgressBar.setProgress(progress);
+        if (isServiceRunning()) {
+            mCalculationProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            mCalculationProgressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean isServiceRunning() {
+        return mSharedPrefs.getBoolean(getString(R.string.key_service_running), false);
     }
 
     private int findPosition(int[] array, int value) {
@@ -145,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        // not implemented
         if (id == R.id.action_settings) {
             return true;
         }

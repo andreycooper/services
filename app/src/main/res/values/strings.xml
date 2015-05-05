@@ -6,6 +6,11 @@
     <string name="label_button_cancel">Cancel</string>
     <string name="label_text_precision">Precision:</string>
 
+    <string name="title_notification_calculating">Calculating PI</string>
+    <string name="title_notification_calculating_completed">Calculating PI completed</string>
+    <string name="content_notification_calculating">Calculating PI with precision %s</string>
+    <string name="content_notification_calculating_completed">Success! PI calculated with precision %s</string>
+
     <string-array name="precision_array">
         <item>32K</item>
         <item>64K</item>
