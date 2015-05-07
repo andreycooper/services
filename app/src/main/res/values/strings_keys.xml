@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="key_service_running">prefs_is_service_running</string>
+    <string name="key_count_to_calculate">prefs_max_count</string>
+    <string name="key_last_calculated">prefs_last_calculated</string>
+    <string name="key_current_progress">prefs_current_progress</string>
+    <string name="key_current_precision_string">prefs_current_precision</string>
+</resources>
